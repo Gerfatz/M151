@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataAccess;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -34,7 +35,7 @@ namespace M151
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DatabaseContext>(opt => opt.UseInMemoryDatabase("TodoList"));
+            services.AddDbContext<ApiContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("M151ToDoList")));
 
             services.AddSwaggerGen(c =>
             {

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DataAccess;
+using DataAccess.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +15,9 @@ namespace Test.Controllers
     [ApiController]
     public class TodoItemController : ControllerBase
     {
-        private readonly DatabaseContext _context;
+        private readonly ApiContext _context;
 
-        public TodoItemController(DatabaseContext context)
+        public TodoItemController(ApiContext context)
         {
             _context = context;
         }
@@ -27,7 +29,7 @@ namespace Test.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItem>>> GetToDos()
         {
-            return await _context.ToDos.ToListAsync();
+            return await _context.TodoItem.ToListAsync();
         }
 
         /// <summary>
@@ -38,7 +40,7 @@ namespace Test.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TodoItem>> GetTodoItem(long id)
         {
-            var todoItem = await _context.ToDos.FindAsync(id);
+            var todoItem = await _context.TodoItem.FindAsync(id);
 
             if (todoItem == null)
             {
@@ -55,7 +57,7 @@ namespace Test.Controllers
         /// <param name="todoItem">Updated Model</param>
         /// <returns>Http Status Code</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodoItem(long id, TodoItem todoItem)
+        public async Task<IActionResult> PutTodoItem(Guid id, TodoItem todoItem)
         {
             if (id != todoItem.Id)
             {
@@ -91,7 +93,7 @@ namespace Test.Controllers
         [HttpPost]
         public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItem todoItem)
         {
-            _context.ToDos.Add(todoItem);
+            _context.TodoItem.Add(todoItem);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
@@ -106,21 +108,21 @@ namespace Test.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<TodoItem>> DeleteTodoItem(long id)
         {
-            var todoItem = await _context.ToDos.FindAsync(id);
+            var todoItem = await _context.TodoItem.FindAsync(id);
             if (todoItem == null)
             {
                 return NotFound();
             }
 
-            _context.ToDos.Remove(todoItem);
+            _context.TodoItem.Remove(todoItem);
             await _context.SaveChangesAsync();
 
             return todoItem;
         }
 
-        private bool TodoItemExists(long id)
+        private bool TodoItemExists(Guid id)
         {
-            return _context.ToDos.Any(e => e.Id == id);
+            return _context.TodoItem.Any(e => e.Id == id);
         }
     }
 }

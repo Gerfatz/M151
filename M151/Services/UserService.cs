@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using DataAccess;
+using DataAccess.Models;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -13,22 +15,18 @@ namespace Test.Services
 {
     public class UserService : IUserService
     {
-        // users hardcoded for simplicity, store in a db with hashed passwords in production applications
-        private List<User> _users = new List<User>
-        {
-            new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test" }
-        };
-
         private readonly AppSettings _appSettings;
+        private readonly ApiContext _db;
 
-        public UserService(IOptions<AppSettings> appsettings)
+        public UserService(IOptions<AppSettings> appsettings, ApiContext db)
         {
             _appSettings = appsettings.Value;
+            _db = db;
         }
 
         public async Task<AuthenticateResponse> Authenticate(string username, string password)
         {
-            var user = await Task.Run(() => _users.SingleOrDefault(x => x.Username == username && x.Password == password));
+            User user = await Task.Run(() => _db.User.SingleOrDefault(x => x.Username == username && x.Password == password));
 
             // return null if user not found
             if (user == null)
@@ -40,7 +38,7 @@ namespace Test.Services
 
         public async Task<IEnumerable<User>> GetAll()
         {
-            return await Task.Run(() => _users.WithoutPasswords());
+            return await Task.Run(() => _db.User.WithoutPasswords());
         }
 
         private string generateJwtToken(User user)
